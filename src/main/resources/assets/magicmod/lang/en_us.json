@@ -1,0 +1,24 @@
+{
+  "command.magicmod.spell.unknown_spell": "Unknown spell: %s",
+  "command.magicmod.spell.learn.success": "%1$s has learned %2$s",
+  "command.magicmod.spell.learn.fail": "Failed to learn spell",
+  "command.magicmod.spell.learn.already_known": "You've already learned %s",
+  "command.magicmod.spell.unlearn.success": "%1$s has unlearned %2$s",
+  "command.magicmod.spell.unlearn.success_downgrade": "%1$s has downgraded %2$s to level %3$s",
+  "command.magicmod.spell.unlearn.fail": "Failed to unlearn spell",
+  "command.magicmod.spell.equip.success": "Equipped %1$s with %2$s in slot %3$s",
+  "command.magicmod.spell.equip.fail": "Failed to equip spell",
+  "command.magicmod.spell.unequip.success": "Spell unequipped from %1$s in slot %2$s",
+  "command.magicmod.spell.unequip.fail": "Failed to unequip spell",
+  "command.magicmod.spell.list.no_known_spells": "No known spells",
+  "command.magicmod.spell.list.known_header": "Known spells (%s):",
+  "command.magicmod.spell.list.equipped_header": "Equipped spells (%s):",
+  "command.magicmod.spell.list.no_equipped_spells": "No equipped spells",
+  "tooltip.magicmod.spell.instance": "%1$s %2$s",
+
+  "spell.magicmod.unknown_spell.name": "Unknown spell",
+  "spell.magicmod.break.name": "Break",
+  "spell.magicmod.blink.name": "Blink",
+  "spell.magicmod.fireball.name": "Fireball",
+  "spell.magicmod.heal.name": "Heal"
+}
