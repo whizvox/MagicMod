@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.whizvox.magicmod.common.api.ManaStorage;
 import me.whizvox.magicmod.common.network.MMNetwork;
 import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.network.UpdateManaMessage;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -19,9 +20,9 @@ public class ManaCommand {
     player.getCapability(MMCapabilities.MANA_STORAGE).ifPresent(manaStorage -> {
       manaStorage.setMana(mana);
       if (manaStorage.isModified()) {
-        MMNetwork.updatePlayerMana(player, manaStorage);
+        MMNetwork.sendToClient(player, new UpdateManaMessage(manaStorage));
       }
-      src.sendSuccess(() -> Component.literal("Set mana to " + manaStorage.getMana()), false);
+      src.sendSuccess(() -> Component.literal("Set mana to " + manaStorage.getMana()), true);
     });
     return 1;
   }
@@ -30,8 +31,8 @@ public class ManaCommand {
     ServerPlayer player = src.getPlayerOrException();
     player.getCapability(MMCapabilities.MANA_STORAGE).ifPresent(manaStorage -> {
       manaStorage.setMaxMana(maxMana);
-      MMNetwork.updatePlayerMana(player, manaStorage);
-      src.sendSuccess(() -> Component.literal("Set max mana to " + manaStorage.getMaxMana()), false);
+      MMNetwork.sendToClient(player, new UpdateManaMessage(manaStorage));
+      src.sendSuccess(() -> Component.literal("Set max mana to " + manaStorage.getMaxMana()), true);
     });
     return 1;
   }
@@ -40,8 +41,8 @@ public class ManaCommand {
     ServerPlayer player = src.getPlayerOrException();
     player.getCapability(MMCapabilities.MANA_STORAGE).ifPresent(manaStorage -> {
       manaStorage.setRechargeRate(rechargeRate);
-      MMNetwork.updatePlayerMana(player, manaStorage);
-      src.sendSuccess(() -> Component.literal("Set recharge rate to " + manaStorage.getRechargeRate()), false);
+      MMNetwork.sendToClient(player, new UpdateManaMessage(manaStorage));
+      src.sendSuccess(() -> Component.literal("Set recharge rate to " + manaStorage.getRechargeRate()), true);
     });
     return 1;
   }

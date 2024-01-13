@@ -16,15 +16,11 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.concurrent.CompletableFuture;
 
-public class SpellArgument implements ArgumentType<Spell> {
+public class SpellArgumentType implements ArgumentType<Spell> {
 
   private static final DynamicCommandExceptionType ERROR_UNKNOWN_SPELL = new DynamicCommandExceptionType(spellName ->
       Component.translatable("command.magicmod.spell.unknown_spell", spellName)
   );
-
-  public static SpellArgument spell() {
-    return new SpellArgument();
-  }
 
   @Override
   public Spell parse(StringReader reader) throws CommandSyntaxException {
@@ -39,6 +35,10 @@ public class SpellArgument implements ArgumentType<Spell> {
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     return SharedSuggestionProvider.suggestResource(SpellRegistry.getRegistry().getKeys(), builder);
+  }
+
+  public static SpellArgumentType spell() {
+    return new SpellArgumentType();
   }
 
   public static Spell getSpell(CommandContext<CommandSourceStack> ctx, String argumentName) {

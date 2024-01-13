@@ -15,10 +15,13 @@
   "command.magicmod.spell.list.equipped_header": "Equipped spells (%s):",
   "command.magicmod.spell.list.no_equipped_spells": "No equipped spells",
   "tooltip.magicmod.spell.instance": "%1$s %2$s",
+  "key.magicmod.openSpellInventory": "Open Spell Inventory",
+  "key.magicmod.categories.mod": "Magic Mod",
 
   "spell.magicmod.unknown_spell.name": "Unknown spell",
   "spell.magicmod.break.name": "Break",
   "spell.magicmod.blink.name": "Blink",
   "spell.magicmod.fireball.name": "Fireball",
-  "spell.magicmod.heal.name": "Heal"
+  "spell.magicmod.heal.name": "Heal",
+  "spell.magicmod.harm.name": "Harm"
 }

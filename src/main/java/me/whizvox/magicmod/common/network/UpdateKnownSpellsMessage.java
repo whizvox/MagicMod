@@ -1,14 +1,11 @@
 package me.whizvox.magicmod.common.network;
 
-import me.whizvox.magicmod.MagicMod;
 import me.whizvox.magicmod.common.api.MagicUser;
-import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
 import me.whizvox.magicmod.common.lib.MMCapabilities;
 import me.whizvox.magicmod.common.util.SpellUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
@@ -18,7 +15,7 @@ import java.util.List;
 public record UpdateKnownSpellsMessage(List<SpellInstance> knownSpells) {
 
   public UpdateKnownSpellsMessage(MagicUser magicUser) {
-    this(magicUser.allKnownSpells().stream().map(SpellInstance::new).toList());
+    this(magicUser.allKnownSpells().map(entry -> new SpellInstance(entry.getKey(), entry.getValue())).toList());
   }
 
   public static final MessageHandler<UpdateKnownSpellsMessage> HANDLER = new MessageHandler<>() {

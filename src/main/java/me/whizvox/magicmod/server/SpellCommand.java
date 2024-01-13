@@ -11,7 +11,7 @@ import me.whizvox.magicmod.common.network.MMNetwork;
 import me.whizvox.magicmod.common.network.UpdateEquippedSpellsMessage;
 import me.whizvox.magicmod.common.network.UpdateKnownSpellsMessage;
 import me.whizvox.magicmod.common.util.SpellUtil;
-import me.whizvox.magicmod.server.command.arguments.SpellArgument;
+import me.whizvox.magicmod.server.command.arguments.SpellArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -27,10 +27,11 @@ public class SpellCommand {
   private static int list(CommandSourceStack src) throws CommandSyntaxException {
     ServerPlayer player = src.getPlayerOrException();
     player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-      var knownSpells = new ArrayList<>(magicUser.allKnownSpells());
+      var knownSpells = magicUser.allKnownSpells().toList();
       if (knownSpells.isEmpty()) {
         src.sendSuccess(() -> Component.translatable("command.magicmod.spell.list.no_known_spells"), false);
       } else {
+        knownSpells = new ArrayList<>(knownSpells);
         knownSpells.sort(Comparator.comparing(entry -> SpellUtil.translateSpell(entry.getKey()).getString()));
         MutableComponent comp = Component.translatable("command.magicmod.spell.list.known_header", knownSpells.size());
         knownSpells.forEach(entry -> {
@@ -39,16 +40,23 @@ public class SpellCommand {
         src.sendSuccess(() -> comp, false);
       }
       var equippedSpells = magicUser.getEquippedSpells();
-      if (equippedSpells.isEmpty()) {
-        src.sendSuccess(() -> Component.translatable("command.magicmod.spell.list.no_equipped_spells"), false);
+      int numEquippedSpells = 0;
+      MutableComponent spellList = Component.empty();
+      for (int i = 0; i < equippedSpells.length; i++) {
+        SpellInstance spellInst = equippedSpells[i];
+        if (spellInst != null) {
+          spellList.append("\n- ")
+              .append(Component.literal(i + ": "))
+              .append(SpellUtil.translateSpellWithLevel(SpellUtil.getName(spellInst.spell()), spellInst.level(), true));
+          numEquippedSpells++;
+        }
+      }
+      if (numEquippedSpells > 0) {
+        Component finalMsg = Component.translatable("command.magicmod.spell.list.equipped_header", numEquippedSpells)
+            .append(spellList);
+        src.sendSuccess(() -> finalMsg, false);
       } else {
-        MutableComponent comp = Component.translatable("command.magicmod.spell.list.equipped_header", equippedSpells.size());
-        equippedSpells.forEach(pair -> {
-          comp.append("\n- ")
-              .append(Component.literal(pair.first() + ": "))
-              .append(SpellUtil.translateSpellWithLevel(SpellUtil.getName(pair.second().spell()), pair.second().level(), true));
-        });
-        src.sendSuccess(() -> comp, false);
+        src.sendSuccess(() -> Component.translatable("command.magicmod.spell.list.no_equipped_spells"), false);
       }
     });
     return 1;
@@ -57,11 +65,7 @@ public class SpellCommand {
   private static int learn(CommandSourceStack src, Spell spell, int level) throws CommandSyntaxException {
     ServerPlayer player = src.getPlayerOrException();
     player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-      if (level < 0) {
-        magicUser.learnSpell(spell);
-      } else {
-        magicUser.learnSpell(spell, level - 1);
-      }
+      magicUser.learnSpell(spell, level);
       if (magicUser.hasBeenModified()) {
         src.sendSuccess(() -> Component.translatable(
             "command.magicmod.spell.learn.success",
@@ -108,7 +112,7 @@ public class SpellCommand {
   public static int equip(CommandSourceStack src, Spell spell, int level, int slot) throws CommandSyntaxException {
     ServerPlayer player = src.getPlayerOrException();
     player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-      magicUser.equipSpell(new SpellInstance(spell, level), slot);
+      magicUser.equipSpell(slot, spell, level);
       if (magicUser.hasBeenModified()) {
         src.sendSuccess(() -> Component.translatable(
             "command.magicmod.spell.equip.success",
@@ -116,7 +120,7 @@ public class SpellCommand {
             SpellUtil.translateSpellWithLevel(SpellUtil.getName(spell), level, true),
             slot
         ), true);
-        MMNetwork.sendToClient(player, new UpdateEquippedSpellsMessage(magicUser));
+        MMNetwork.sendToClient(player, new UpdateEquippedSpellsMessage(magicUser, true));
       } else {
         src.sendFailure(Component.translatable("command.magicmod.spell.equip.fail"));
       }
@@ -134,6 +138,7 @@ public class SpellCommand {
             player.getName(),
             slot
         ), true);
+        MMNetwork.sendToClient(player, new UpdateEquippedSpellsMessage(magicUser, true));
       } else {
         src.sendFailure(Component.translatable("command.magicmod.spell.unequip.fail"));
       }
@@ -147,26 +152,29 @@ public class SpellCommand {
             .executes(ctx -> list(ctx.getSource()))
         )
         .then(Commands.literal("learn")
-            .then(Commands.argument("spell", SpellArgument.spell())
-                .executes(ctx -> learn(ctx.getSource(), SpellArgument.getSpell(ctx, "spell"), -1))
+            .then(Commands.argument("spell", SpellArgumentType.spell())
+                .executes(ctx -> learn(ctx.getSource(), SpellArgumentType.getSpell(ctx, "spell"), 1))
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 127))
-                    .executes(ctx -> learn(ctx.getSource(), SpellArgument.getSpell(ctx, "spell"), IntegerArgumentType.getInteger(ctx, "level") - 1))
+                    .executes(ctx -> learn(ctx.getSource(), SpellArgumentType.getSpell(ctx, "spell"), IntegerArgumentType.getInteger(ctx, "level") - 1))
                 )
             )
         )
         .then(Commands.literal("unlearn")
-            .then(Commands.argument("spell", SpellArgument.spell())
-                .executes(ctx -> unlearn(ctx.getSource(), SpellArgument.getSpell(ctx, "spell"), -1))
+            .then(Commands.argument("spell", SpellArgumentType.spell())
+                .executes(ctx -> unlearn(ctx.getSource(), SpellArgumentType.getSpell(ctx, "spell"), -1))
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 127))
-                    .executes(ctx -> unlearn(ctx.getSource(), SpellArgument.getSpell(ctx, "spell"), IntegerArgumentType.getInteger(ctx, "level") - 1))
+                    .executes(ctx -> unlearn(ctx.getSource(), SpellArgumentType.getSpell(ctx, "spell"), IntegerArgumentType.getInteger(ctx, "level") - 1))
                 )
             )
         )
         .then(Commands.literal("equip")
-            .then(Commands.argument("spell", SpellArgument.spell())
+            .then(Commands.argument("spell", SpellArgumentType.spell())
                 .then(Commands.argument("level", IntegerArgumentType.integer(1, 127))
                     .then(Commands.argument("slot", IntegerArgumentType.integer(0, MagicUser.EQUIP_SLOTS))
-                        .executes(ctx -> equip(ctx.getSource(), SpellArgument.getSpell(ctx, "spell"), IntegerArgumentType.getInteger(ctx, "level") - 1, IntegerArgumentType.getInteger(ctx, "slot")))
+                        .executes(ctx -> equip(ctx.getSource(), SpellArgumentType.getSpell(ctx, "spell"),
+                            IntegerArgumentType.getInteger(ctx, "level") - 1,
+                            IntegerArgumentType.getInteger(ctx, "slot")
+                        ))
                     )
                 )
             )

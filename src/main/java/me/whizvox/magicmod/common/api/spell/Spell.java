@@ -1,17 +1,13 @@
 package me.whizvox.magicmod.common.api.spell;
 
-public interface Spell {
+import net.minecraft.world.entity.LivingEntity;
 
-  int getCost(int level);
+public interface Spell {
 
   int getMaxLevel();
 
-  CastType getCastType();
+  int getCost(int level);
 
-  boolean hasState();
-
-  SpellState createState();
-
-  ActivationResult activate(int level, SpellUsageContext context);
+  boolean activate(int level, LivingEntity caster);
 
 }

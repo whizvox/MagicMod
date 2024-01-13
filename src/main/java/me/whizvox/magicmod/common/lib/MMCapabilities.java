@@ -18,7 +18,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 public class MMCapabilities {
 
   public static final Capability<ManaStorage> MANA_STORAGE = CapabilityManager.get(new CapabilityToken<>() {});
-  public static final Capability<MagicUser> MAGIC_USER = CapabilityManager.get(new CapabilityToken<MagicUser>() {});
+  public static final Capability<MagicUser> MAGIC_USER = CapabilityManager.get(new CapabilityToken<>() {});
 
   private static void onRegister(RegisterCapabilitiesEvent event) {
     event.register(ManaStorage.class);

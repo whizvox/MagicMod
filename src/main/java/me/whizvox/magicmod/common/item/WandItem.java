@@ -31,13 +31,9 @@ public class WandItem extends Item {
         int spellLevel = selectedSpell.level();
         double cost = spell.getCost(spellLevel);
         if (cost <= manaStorage.getMana()) {
-          if (spell.getCastType() == CastType.INSTANT) {
-            ActivationResult res = spell.activate(spellLevel, new SpellUsageContext(player, magicUser.getSpellState(selected, SpellState.class), magicUser, manaStorage));
-            switch (res) {
-              case SUCCESS -> {
-                manaStorage.changeMana(-cost);
-              }
-            }
+          boolean res = spell.activate(spellLevel, player);
+          if (res) {
+            manaStorage.changeMana(-cost);
           }
         }
       }

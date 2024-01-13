@@ -1,12 +1,9 @@
 package me.whizvox.magicmod.common.lib.spell;
 
-import me.whizvox.magicmod.common.api.spell.ActivationResult;
-import me.whizvox.magicmod.common.api.spell.CastType;
-import me.whizvox.magicmod.common.api.spell.SpellUsageContext;
-import me.whizvox.magicmod.common.api.spell.StatelessSpell;
+import me.whizvox.magicmod.common.api.spell.Spell;
 import net.minecraft.world.entity.LivingEntity;
 
-public class HealSpell implements StatelessSpell {
+public class HealSpell implements Spell {
 
   @Override
   public int getCost(int level) {
@@ -19,18 +16,12 @@ public class HealSpell implements StatelessSpell {
   }
 
   @Override
-  public CastType getCastType() {
-    return CastType.INSTANT;
-  }
-
-  @Override
-  public ActivationResult activate(int level, SpellUsageContext context) {
-    LivingEntity caster = (LivingEntity) context.caster();
+  public boolean activate(int level, LivingEntity caster) {
     if (caster.getHealth() < caster.getMaxHealth()) {
       caster.heal(5.0F * level);
-      return ActivationResult.SUCCESS;
+      return true;
     }
-    return ActivationResult.CANCEL;
+    return false;
   }
 
 }

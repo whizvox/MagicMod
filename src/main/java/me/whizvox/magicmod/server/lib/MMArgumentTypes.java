@@ -1,7 +1,7 @@
 package me.whizvox.magicmod.server.lib;
 
 import me.whizvox.magicmod.MagicMod;
-import me.whizvox.magicmod.server.command.arguments.SpellArgument;
+import me.whizvox.magicmod.server.command.arguments.SpellArgumentType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -19,6 +19,6 @@ public class MMArgumentTypes {
   }
 
   public static final RegistryObject<ArgumentTypeInfo<?, ?>>
-      SPELL = ARGUMENT_TYPES.register("spell", () -> ArgumentTypeInfos.registerByClass(SpellArgument.class, SingletonArgumentInfo.contextFree(SpellArgument::new)));
+      SPELL = ARGUMENT_TYPES.register("spell", () -> ArgumentTypeInfos.registerByClass(SpellArgumentType.class, SingletonArgumentInfo.contextFree(SpellArgumentType::new)));
 
 }

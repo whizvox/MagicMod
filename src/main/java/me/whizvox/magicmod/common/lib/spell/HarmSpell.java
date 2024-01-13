@@ -1,20 +1,16 @@
 package me.whizvox.magicmod.common.lib.spell;
 
-import me.whizvox.magicmod.common.api.spell.ActivationResult;
-import me.whizvox.magicmod.common.api.spell.CastType;
-import me.whizvox.magicmod.common.api.spell.SpellUsageContext;
-import me.whizvox.magicmod.common.api.spell.StatelessSpell;
+import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.util.SpellUtil;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-public class HarmSpell implements StatelessSpell {
+public class HarmSpell implements Spell {
 
   @Override
   public int getCost(int level) {
-    return 5;
+    return 5 + level * 5;
   }
 
   @Override
@@ -23,18 +19,13 @@ public class HarmSpell implements StatelessSpell {
   }
 
   @Override
-  public CastType getCastType() {
-    return CastType.INSTANT;
-  }
-
-  @Override
-  public ActivationResult activate(int level, SpellUsageContext context) {
-    EntityHitResult hit = SpellUtil.lookingAtEntity((Entity) context.caster(), 5.0D, entity -> entity instanceof LivingEntity);
+  public boolean activate(int level, LivingEntity caster) {
+    EntityHitResult hit = SpellUtil.lookingAtEntity(caster, 5.0D, entity -> entity instanceof LivingEntity);
     if (hit.getType() == HitResult.Type.ENTITY) {
-      hit.getEntity().hurt(hit.getEntity().damageSources().magic(), 5.0F * level);
-      return ActivationResult.SUCCESS;
+      hit.getEntity().hurt(hit.getEntity().damageSources().indirectMagic(caster, hit.getEntity()), 5.0F * (level + 1));
+      return true;
     } else {
-      return ActivationResult.CANCEL;
+      return false;
     }
   }
 

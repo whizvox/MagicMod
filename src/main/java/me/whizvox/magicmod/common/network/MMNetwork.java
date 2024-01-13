@@ -1,16 +1,12 @@
 package me.whizvox.magicmod.common.network;
 
 import me.whizvox.magicmod.MagicMod;
-import me.whizvox.magicmod.common.api.ManaStorage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 public class MMNetwork {
 
@@ -36,14 +32,15 @@ public class MMNetwork {
     addHandler(id++, UpdateManaMessage.HANDLER);
     addHandler(id++, UpdateKnownSpellsMessage.HANDLER);
     addHandler(id++, UpdateEquippedSpellsMessage.HANDLER);
+    addHandler(id++, UpdateSelectedSpellMessage.HANDLER);
   }
 
   public static void sendToClient(ServerPlayer player, Object msg) {
     INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), msg);
   }
 
-  public static void updatePlayerMana(ServerPlayer player, ManaStorage manaStorage) {
-    sendToClient(player, new UpdateManaMessage(manaStorage));
+  public static void sendToServer(Object msg) {
+    INSTANCE.sendToServer(msg);
   }
 
 }

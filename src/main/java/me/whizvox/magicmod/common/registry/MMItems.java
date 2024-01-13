@@ -2,6 +2,7 @@ package me.whizvox.magicmod.common.registry;
 
 import me.whizvox.magicmod.MagicMod;
 import me.whizvox.magicmod.common.item.UniversalDiggerItem;
+import me.whizvox.magicmod.common.item.WandItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -16,6 +17,8 @@ public class MMItems {
   public static void register(IEventBus bus) {
     ITEMS.register(bus);
   }
+
+  public static final RegistryObject<WandItem> WAND = ITEMS.register("wand", WandItem::new);
 
   public static final RegistryObject<Item>
       UNIVERSAL_STONE_DIGGER = ITEMS.register("universal_stone_digger", () -> new UniversalDiggerItem(Tiers.STONE)),

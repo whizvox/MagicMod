@@ -27,6 +27,11 @@ import java.util.function.Predicate;
 
 public class SpellUtil {
 
+  private static final ResourceLocation
+      UNKNOWN_SPELL_ICON_TEXTURE = new ResourceLocation(MagicMod.MOD_ID, "textures/gui/unknown_spell_icon.png");
+  private static final MutableComponent
+      UNKNOWN_SPELL_COMPONENT = Component.translatable("spell.magicmod.unknown_spell.name");
+
   public static String formatRomanNumeralsLazy(int n) {
     return switch (n) {
       case 1 -> "I";
@@ -41,6 +46,18 @@ public class SpellUtil {
       case 10 -> "X";
       default -> Integer.toString(n);
     };
+  }
+
+  public static ResourceLocation getSpellIconTexture(ResourceLocation spellName) {
+    return new ResourceLocation(spellName.getNamespace(), "textures/gui/spellicons/" + spellName.getPath() + ".png");
+  }
+
+  public static ResourceLocation getSpellIconTexture(Spell spell) {
+    ResourceLocation spellName = getName(spell);
+    if (spellName == null) {
+      return UNKNOWN_SPELL_ICON_TEXTURE;
+    }
+    return getSpellIconTexture(spellName);
   }
 
   public static Pair<ManaStorage, MagicUser> getMagicCapabilities(ICapabilityProvider caster) {
@@ -100,6 +117,14 @@ public class SpellUtil {
 
   public static MutableComponent translateSpellWithLevel(ResourceLocation spellName, int level) {
     return translateSpellWithLevel(spellName, level, false);
+  }
+
+  public static MutableComponent translateSpellWithLevel(SpellInstance spellInst, boolean withHover) {
+    ResourceLocation spellName = getName(spellInst.spell());
+    if (spellName == null) {
+      return UNKNOWN_SPELL_COMPONENT.append(" " + formatRomanNumeralsLazy(spellInst.level() + 1));
+    }
+    return translateSpellWithLevel(spellName, spellInst.level(), withHover);
   }
 
   public static void encodeSpellInstance(SpellInstance spellInst, FriendlyByteBuf buf) {
