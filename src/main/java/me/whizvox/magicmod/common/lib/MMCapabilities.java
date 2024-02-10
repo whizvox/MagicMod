@@ -2,8 +2,8 @@ package me.whizvox.magicmod.common.lib;
 
 import me.whizvox.magicmod.MagicMod;
 import me.whizvox.magicmod.common.api.MagicUser;
-import me.whizvox.magicmod.common.capability.MagicUserProvider;
 import me.whizvox.magicmod.common.api.ManaStorage;
+import me.whizvox.magicmod.common.capability.MagicUserProvider;
 import me.whizvox.magicmod.common.capability.ManaStorageProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;

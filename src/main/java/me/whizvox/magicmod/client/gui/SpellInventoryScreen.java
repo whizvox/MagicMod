@@ -51,7 +51,7 @@ public class SpellInventoryScreen extends Screen {
   private final SpellSlot[] icons;
   private int scroll;
 
-  private SpellInstance spellInst;
+  private SpellInstance heldSpellInst;
 
   public SpellInventoryScreen() {
     super(Component.literal("Spells"));
@@ -59,12 +59,12 @@ public class SpellInventoryScreen extends Screen {
     topPos = 0;
     icons = new SpellSlot[TOTAL_SLOTS];
     scroll = 0;
-    spellInst = null;
+    heldSpellInst = null;
   }
 
   @Override
   protected void init() {
-    MagicUser magicUser = Minecraft.getInstance().player.getCapability(MMCapabilities.MAGIC_USER).orElse(null);
+    MagicUser magicUser = minecraft.player.getCapability(MMCapabilities.MAGIC_USER).orElse(null);
     leftPos = (width - 194) / 2;
     topPos = (height - 166) / 2;
     for (int i = 0; i < icons.length; i++) {
@@ -80,23 +80,20 @@ public class SpellInventoryScreen extends Screen {
 
   @Override
   public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-    super.renderBackground(g);
+    renderBackground(g);
     g.blit(TEXTURE, leftPos, topPos, 0, 0, 194, 166, 256, 256);
     super.render(g, mouseX, mouseY, partialTick);
-    g.pose().pushPose();
-    g.pose().translate(leftPos, topPos, 0);
     for (SpellSlot icon : icons) {
       if (icon.isHovered()) {
-        int x = icon.getX() - leftPos;
-        int y = icon.getY() - topPos;
+        int x = icon.getX();
+        int y = icon.getY();
         g.fillGradient(RenderType.guiOverlay(), x, y, x + 16, y + 16, 0x80FFFFFF, 0x80FFFFFF, 0);
       }
     }
-    g.pose().popPose();
-    if (spellInst != null) {
+    if (heldSpellInst != null) {
       g.pose().pushPose();
       g.pose().translate(0, 0, 1);
-      renderSpellIcon(g, spellInst, mouseX - 8, mouseY - 8);
+      renderSpellIcon(g, heldSpellInst, mouseX - 8, mouseY - 8);
       g.pose().popPose();
     }
   }
@@ -114,25 +111,14 @@ public class SpellInventoryScreen extends Screen {
         .limit(SEARCH_SLOTS)
         .toList();
     for (int i = 0; i < spells.size(); i++) {
-      setSpell(i + HOTBAR_SLOTS, spells.get(i));
+      icons[i + HOTBAR_SLOTS].spellInst = spells.get(i);
+      icons[i + HOTBAR_SLOTS].update();
     }
   }
 
   public void setScroll(int scroll) {
     this.scroll = scroll;
     updateReadOnlyIcons();
-  }
-
-  private static void checkSlot(int slot) {
-    if (slot < 0 || slot > TOTAL_SLOTS) {
-      throw new IndexOutOfBoundsException();
-    }
-  }
-
-  public void setSpell(int slot, SpellInstance spellInst) {
-    checkSlot(slot);
-    icons[slot].spellInst = spellInst;
-    icons[slot].update();
   }
 
   @Override
@@ -176,7 +162,7 @@ public class SpellInventoryScreen extends Screen {
     private Component levelComp;
 
     public SpellSlot(int x, int y, SpellInstance spellInst, boolean isReadOnly) {
-      super(x, y, 18, 18, Component.empty());
+      super(x, y, 16, 16, Component.empty());
       this.spellInst = spellInst;
       this.isReadOnly = isReadOnly;
       iconTexture = null;
@@ -199,10 +185,10 @@ public class SpellInventoryScreen extends Screen {
     @Override
     protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTicks) {
       if (iconTexture != null) {
-        g.blit(iconTexture, getX(), getY(), 0, 0, 0, getWidth() - 2, getHeight() - 2, 16, 16);
+        g.blit(iconTexture, getX(), getY(), 0, 0, 0, getWidth(), getHeight(), 16, 16);
         FormattedCharSequence seq = FormattedCharSequence.forward(levelComp.getString(), Style.EMPTY);
-        int width = Minecraft.getInstance().font.width(seq);
-        g.drawString(Minecraft.getInstance().font, seq, getX() + 17 - width, getY() + 18 - Minecraft.getInstance().font.lineHeight, 0xFFFFFF);
+        int width = minecraft.font.width(seq);
+        g.drawString(minecraft.font, seq, getX() + 17 - width, getY() + 18 - minecraft.font.lineHeight, 0xFFFFFF);
       }
       if (isHovered) {
         setTooltipForNextRenderPass(getMessage());
@@ -212,14 +198,14 @@ public class SpellInventoryScreen extends Screen {
     @Override
     public void onClick(double pMouseX, double pMouseY) {
       if (isReadOnly) {
-        if (SpellInventoryScreen.this.spellInst == null) {
-          SpellInventoryScreen.this.spellInst = spellInst;
+        if (SpellInventoryScreen.this.heldSpellInst == null) {
+          SpellInventoryScreen.this.heldSpellInst = spellInst;
         } else {
-          SpellInventoryScreen.this.spellInst = null;
+          SpellInventoryScreen.this.heldSpellInst = null;
         }
       } else {
-        SpellInstance temp = SpellInventoryScreen.this.spellInst;
-        SpellInventoryScreen.this.spellInst = spellInst;
+        SpellInstance temp = SpellInventoryScreen.this.heldSpellInst;
+        SpellInventoryScreen.this.heldSpellInst = spellInst;
         spellInst = temp;
         update();
       }

@@ -1,6 +1,7 @@
 package me.whizvox.magicmod.common.registry;
 
 import me.whizvox.magicmod.MagicMod;
+import me.whizvox.magicmod.common.item.KnowledgeScrollItem;
 import me.whizvox.magicmod.common.item.UniversalDiggerItem;
 import me.whizvox.magicmod.common.item.WandItem;
 import net.minecraft.world.item.Item;
@@ -24,6 +25,8 @@ public class MMItems {
       UNIVERSAL_STONE_DIGGER = ITEMS.register("universal_stone_digger", () -> new UniversalDiggerItem(Tiers.STONE)),
       UNIVERSAL_IRON_DIGGER = ITEMS.register("universal_iron_digger", () -> new UniversalDiggerItem(Tiers.IRON)),
       UNIVERSAL_DIAMOND_DIGGER = ITEMS.register("universal_diamond_digger", () -> new UniversalDiggerItem(Tiers.DIAMOND)),
-      UNIVERSAL_NETHERITE_DIGGER = ITEMS.register("universal_netherite_digger", () -> new UniversalDiggerItem(Tiers.NETHERITE));
+      UNIVERSAL_NETHERITE_DIGGER = ITEMS.register("universal_netherite_digger", () -> new UniversalDiggerItem(Tiers.NETHERITE)),
+      KNOWLEDGE_FRAGMENT = ITEMS.register("knowledge_fragment", () -> new Item(new Item.Properties())),
+      KNOWLEDGE_SCROLL = ITEMS.register("knowledge_scroll", KnowledgeScrollItem::new);
 
 }

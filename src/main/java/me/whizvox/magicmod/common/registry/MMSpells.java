@@ -1,10 +1,7 @@
 package me.whizvox.magicmod.common.registry;
 
 import me.whizvox.magicmod.common.api.spell.Spell;
-import me.whizvox.magicmod.common.lib.spell.BlinkSpell;
-import me.whizvox.magicmod.common.lib.spell.FireballSpell;
-import me.whizvox.magicmod.common.lib.spell.HarmSpell;
-import me.whizvox.magicmod.common.lib.spell.HealSpell;
+import me.whizvox.magicmod.common.lib.spell.*;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -16,7 +13,9 @@ public class MMSpells {
       HARM = SPELLS.register("harm", HarmSpell::new),
       HEAL = SPELLS.register("heal", HealSpell::new),
       FIREBALL = SPELLS.register("fireball", FireballSpell::new),
-      BLINK = SPELLS.register("blink", BlinkSpell::new);
+      BLINK = SPELLS.register("blink", BlinkSpell::new),
+      BREAK = SPELLS.register("break", BreakSpell::new),
+      SHIELD = SPELLS.register("shield", ShieldSpell::new);
 
   public static void register(IEventBus bus) {
     SPELLS.register(bus);

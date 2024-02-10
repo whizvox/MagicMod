@@ -1,4 +1,9 @@
 {
+  "item.magicmod.knowledge_scroll": "Scroll of Knowledge",
+  "item.magicmod.knowledge_scroll.with_spell": "Scroll of Knowledge (%s)",
+  "message.magicmod.knowledge_scroll.learned": "You have gained knowledge of %s",
+  "message.magicmod.spell.shield.cast": "A mighty shield has been cast upon you...",
+
   "command.magicmod.spell.unknown_spell": "Unknown spell: %s",
   "command.magicmod.spell.learn.success": "%1$s has learned %2$s",
   "command.magicmod.spell.learn.fail": "Failed to learn spell",

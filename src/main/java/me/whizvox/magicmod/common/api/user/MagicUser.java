@@ -1,4 +1,4 @@
-package me.whizvox.magicmod.common.api;
+package me.whizvox.magicmod.common.api.user;
 
 import me.whizvox.magicmod.MagicMod;
 import me.whizvox.magicmod.common.api.spell.Spell;
@@ -9,17 +9,22 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.DoubleSupplier;
-import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 
 public class MagicUser implements INBTSerializable<CompoundTag> {
 
-  public static final int EQUIP_SLOTS = 9;
+  private static final int
+      RECHARGE_COOLDOWN = 20,
+      EQUIP_SLOTS = 9;
+
+  private double mana;
+  private double maxMana;
+  private double rechargeAmount;
+  private int rechargeCooldown;
 
   private final Map<Spell, Integer> knownSpells;
   private final SpellInstance[] equippedSpells;
@@ -29,33 +34,64 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
   private boolean modified;
 
   public MagicUser() {
+    mana = 0;
+    rechargeAmount = 0;
+    maxMana = 0;
+    rechargeCooldown = 0;
     knownSpells = new HashMap<>();
     equippedSpells = new SpellInstance[EQUIP_SLOTS];
     selectedEquippedSpell = 0;
     spellData = new HashMap<>();
-
-    modified = false;
-  }
-
-  private void clearEquippedSpells() {
-    for (int i = 0; i < EQUIP_SLOTS; i++) {
-      equippedSpells[i] = null;
-    }
   }
 
   public void markModified() {
     modified = true;
   }
 
-  public Stream<Map.Entry<Spell, Integer>> allKnownSpells() {
+  public boolean isModified() {
+    if (modified) {
+      modified = false;
+      return true;
+    }
+    return false;
+  }
+
+  public double getMana() {
+    return mana;
+  }
+
+  public double getMaxMana() {
+    return maxMana;
+  }
+
+  public double getRechargeAmount() {
+    return rechargeAmount;
+  }
+
+  public void setMana(double mana) {
+    double prevMana = this.mana;
+    this.mana = Mth.clamp(mana, 0, maxMana);
+    modified = modified || this.mana != prevMana;
+  }
+
+  public void changeMana(double amount) {
+    setMana(mana + amount);
+  }
+
+  public void setMaxMana(double maxMana) {
+    this.maxMana = Mth.clamp(maxMana, 0, Double.MAX_VALUE);
+    modified = true;
+  }
+
+  public void setRechargeAmount(double rechargeAmount) {
+    this.rechargeAmount = Mth.clamp(rechargeAmount, 0, Double.MAX_VALUE);
+    modified = true;
+  }
+
+  public Stream<Map.Entry<Spell, Integer>> knownSpells() {
     return knownSpells.entrySet().stream();
   }
 
-  /**
-   * Gets the learned level of a potentially known spell.
-   * @param spell The spell to check
-   * @return The learned level of the spell (zero-indexed), -1 if not known
-   */
   public int getKnownLevel(Spell spell) {
     return knownSpells.getOrDefault(spell, -1);
   }
@@ -64,29 +100,27 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
     return getKnownLevel(spell) >= level;
   }
 
-  public SpellInstance getEquippedSpell(int slot) {
-    if (isValidEquipSlot(slot)) {
-      return equippedSpells[slot];
-    }
-    return null;
+  public boolean isValidEquipSlot(int slot) {
+    return slot >= 0 && slot < EQUIP_SLOTS;
   }
 
   public SpellInstance[] getEquippedSpells() {
-    SpellInstance[] copy = new SpellInstance[EQUIP_SLOTS];
-    System.arraycopy(equippedSpells, 0, copy, 0, EQUIP_SLOTS);
+    SpellInstance[] copy = new SpellInstance[equippedSpells.length];
+    System.arraycopy(equippedSpells, 0, copy, 0, equippedSpells.length);
     return copy;
+  }
+
+  public SpellInstance getEquippedSpell(int slot) {
+    return isValidEquipSlot(slot) ? equippedSpells[slot] : null;
   }
 
   public int getSelectedEquippedSpell() {
     return selectedEquippedSpell;
   }
 
-  public void learnSpell(Spell spell, int level) {
-    int currKnownLevel = getKnownLevel(spell);
-    if (level > currKnownLevel && level <= spell.getMaxLevel()) {
-      knownSpells.put(spell, level);
-      markModified();
-    }
+  public <DATA extends SpellData> DATA getData(ResourceLocation key) {
+    //noinspection unchecked
+    return (DATA) spellData.get(key);
   }
 
   public void learnSpell(Spell spell) {
@@ -99,18 +133,6 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
   public void unlearnSpell(Spell spell) {
     Integer ret = knownSpells.remove(spell);
     if (ret != null) {
-      markModified();
-    }
-  }
-
-  public void downgradeLearnedSpell(Spell spell, int newLevel) {
-    if (newLevel < 0) {
-      unlearnSpell(spell);
-    } else {
-      int level = getKnownLevel(spell);
-      if (newLevel < level) {
-        knownSpells.put(spell, newLevel);
-      }
       markModified();
     }
   }
@@ -129,23 +151,10 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
     }
   }
 
-  public boolean hasBeenModified() {
-    if (modified) {
-      modified = false;
-      return true;
-    }
-    return false;
-  }
-
   public void setSelectedEquippedSpell(int slot) {
     if (isValidEquipSlot(slot)) {
       selectedEquippedSpell = slot;
     }
-  }
-
-  public <DATA extends SpellData> DATA getData(ResourceLocation key) {
-    //noinspection unchecked
-    return (DATA) spellData.get(key);
   }
 
   public <DATA extends SpellData> DATA addData(ResourceLocation key, DATA data) {
@@ -154,26 +163,38 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
     return data;
   }
 
-  public void tickData(DoubleSupplier manaSupplier, Consumer<Double> manaDrainConsumer) {
+  public void removeData(ResourceLocation key) {
+    if (spellData.remove(key) != null) {
+      markModified();
+    }
+  }
+
+  public void tick() {
+    // attempt to recharge mana
+    if (rechargeAmount > 0 && mana < maxMana) {
+      if (++rechargeCooldown >= RECHARGE_COOLDOWN) {
+        rechargeCooldown = 0;
+        changeMana(rechargeAmount);
+      }
+    } else {
+      if (rechargeCooldown != 0) {
+        rechargeCooldown = 0;
+      }
+    }
+    // tick through all spell data
     if (!spellData.isEmpty()) {
       List<ResourceLocation> toRemove = new ArrayList<>();
       spellData.forEach((key, data) -> {
         if (data.shouldRemove()) {
           toRemove.add(key);
         } else {
-          double drainAmount = data.tick(manaSupplier.getAsDouble());
+          double drainAmount = data.tick(mana);
           if (drainAmount != 0) {
-            manaDrainConsumer.accept(drainAmount);
+            changeMana(-drainAmount);
           }
         }
       });
       toRemove.forEach(spellData::remove);
-      markModified();
-    }
-  }
-
-  public void removeData(ResourceLocation key) {
-    if (spellData.remove(key) != null) {
       markModified();
     }
   }
@@ -192,6 +213,9 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
   @Override
   public CompoundTag serializeNBT() {
     CompoundTag tag = new CompoundTag();
+    tag.putDouble("Mana", mana);
+    tag.putDouble("MaxMana", maxMana);
+    tag.putDouble("RechargeAmount", rechargeAmount);
     ListTag knownSpellsTag = new ListTag();
     knownSpells.forEach((spell, level) -> knownSpellsTag.add(new SpellInstance(spell, level).serializeNBT()));
     tag.put("KnownSpells", knownSpellsTag);
@@ -211,15 +235,18 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
   }
 
   @Override
-  public void deserializeNBT(CompoundTag tag) {
+  public void deserializeNBT(CompoundTag nbt) {
     knownSpells.clear();
     spellData.clear();
     Arrays.fill(equippedSpells, null);
-    tag.getList("KnownSpells", Tag.TAG_COMPOUND).forEach(knownSpellTag -> {
+    mana = nbt.getDouble("Mana");
+    maxMana = nbt.getDouble("MaxMana");
+    rechargeAmount = nbt.getDouble("RechargeAmount");
+    nbt.getList("KnownSpells", Tag.TAG_COMPOUND).forEach(knownSpellTag -> {
       SpellInstance spellInst = SpellInstance.fromTag((CompoundTag) knownSpellTag);
       knownSpells.put(spellInst.spell(), spellInst.level());
     });
-    tag.getList("EquippedSpells", Tag.TAG_COMPOUND).forEach(equippedSpellTagRaw -> {
+    nbt.getList("EquippedSpells", Tag.TAG_COMPOUND).forEach(equippedSpellTagRaw -> {
       CompoundTag equippedSpellTag = (CompoundTag) equippedSpellTagRaw;
       int slot = equippedSpellTag.getByte("Slot");
       SpellInstance spellInst = SpellInstance.fromTag(equippedSpellTag.getCompound("SpellInstance"));
@@ -229,11 +256,6 @@ public class MagicUser implements INBTSerializable<CompoundTag> {
         MagicMod.LOGGER.warn("Invalid equip slot while deserializing MagicUser: {}", slot);
       }
     });
-    SpellDataManager.INSTANCE.deserialize(tag.get("SpellData"), spellData);
+    SpellDataManager.INSTANCE.deserialize(nbt.get("SpellData"), spellData);
   }
-
-  public static boolean isValidEquipSlot(int index) {
-    return index >= 0 && index < EQUIP_SLOTS;
-  }
-
 }
