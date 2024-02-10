@@ -2,7 +2,7 @@ package me.whizvox.magicmod.common.network;
 
 import me.whizvox.magicmod.common.api.MagicUser;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.util.SpellUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,7 +15,7 @@ import java.util.List;
 public record UpdateKnownSpellsMessage(List<SpellInstance> knownSpells) {
 
   public UpdateKnownSpellsMessage(MagicUser magicUser) {
-    this(magicUser.allKnownSpells().map(entry -> new SpellInstance(entry.getKey(), entry.getValue())).toList());
+    this(magicUser.knownSpells().map(entry -> new SpellInstance(entry.getKey(), entry.getValue())).toList());
   }
 
   public static final MessageHandler<UpdateKnownSpellsMessage> HANDLER = new MessageHandler<>() {
@@ -46,9 +46,8 @@ public record UpdateKnownSpellsMessage(List<SpellInstance> knownSpells) {
 
     @Override
     public void handle(NetworkEvent.Context ctx, UpdateKnownSpellsMessage msg) {
-      Minecraft.getInstance().player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-        magicUser.updateKnownSpells(msg.knownSpells);
-      });
+      MagicUser magicUser = MagicUserManager.getUser(Minecraft.getInstance().player);
+      magicUser.updateKnownSpells(msg.knownSpells);
     }
 
   };

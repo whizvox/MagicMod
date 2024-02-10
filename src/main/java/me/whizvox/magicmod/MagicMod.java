@@ -3,9 +3,8 @@ package me.whizvox.magicmod;
 import me.whizvox.magicmod.client.ClientEventListeners;
 import me.whizvox.magicmod.client.MMKeyMappings;
 import me.whizvox.magicmod.common.api.spelldata.SpellDataManager;
-import me.whizvox.magicmod.common.api.user.MagicUserManager;
 import me.whizvox.magicmod.common.event.WorldEventListeners;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.lib.spell.ShieldSpell;
 import me.whizvox.magicmod.common.lib.spelldata.ShieldSpellData;
 import me.whizvox.magicmod.common.network.MMNetwork;
@@ -45,7 +44,6 @@ public class MagicMod {
     MMItems.register(modBus);
     MMCreativeModeTabs.register(modBus);
     MMSpells.register(modBus);
-    MMCapabilities.register(modBus, forgeBus);
     MMArgumentTypes.register(modBus);
 
     forgeBus.register(ClientEventListeners.class);

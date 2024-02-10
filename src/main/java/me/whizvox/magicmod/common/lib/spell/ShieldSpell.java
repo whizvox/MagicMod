@@ -1,12 +1,14 @@
 package me.whizvox.magicmod.common.lib.spell;
 
 import me.whizvox.magicmod.MagicMod;
+import me.whizvox.magicmod.common.api.MagicUser;
 import me.whizvox.magicmod.common.api.spell.Spell;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.lib.spelldata.ShieldSpellData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class ShieldSpell implements Spell {
 
@@ -24,11 +26,10 @@ public class ShieldSpell implements Spell {
 
   @Override
   public boolean activate(int level, LivingEntity caster) {
-    return caster.getCapability(MMCapabilities.MAGIC_USER).map(magicUser -> {
-      magicUser.addData(SHIELD_DATA_KEY, new ShieldSpellData(level));
-      caster.sendSystemMessage(Component.translatable("message.magicmod.spell.shield.cast"));
-      return true;
-    }).orElse(false);
+    MagicUser magicUser = MagicUserManager.getUser(caster.getUUID());
+    magicUser.addData(SHIELD_DATA_KEY, new ShieldSpellData(level));
+    ((Player) caster).displayClientMessage(Component.translatable("message.magicmod.spell.shield.cast"), true);
+    return true;
   }
 
 }

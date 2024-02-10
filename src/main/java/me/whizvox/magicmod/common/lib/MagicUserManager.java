@@ -1,8 +1,10 @@
-package me.whizvox.magicmod.common.api.user;
+package me.whizvox.magicmod.common.lib;
 
 import me.whizvox.magicmod.MagicMod;
+import me.whizvox.magicmod.common.api.MagicUser;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -15,6 +17,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 public class MagicUserManager {
@@ -27,8 +30,16 @@ public class MagicUserManager {
     return users.get(playerId);
   }
 
+  public static MagicUser getUser(Player player) {
+    return getUser(player.getUUID());
+  }
+
   public static Stream<Map.Entry<UUID, MagicUser>> stream() {
     return users.entrySet().stream();
+  }
+
+  public static void forEach(BiConsumer<UUID, MagicUser> consumer) {
+    users.forEach(consumer);
   }
 
   public static void save(Path outputDir) {
@@ -98,6 +109,7 @@ public class MagicUserManager {
 
   private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
     users.putIfAbsent(event.getEntity().getUUID(), new MagicUser());
+    // TODO update client
   }
 
 }

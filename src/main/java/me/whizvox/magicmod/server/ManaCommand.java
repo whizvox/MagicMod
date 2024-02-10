@@ -3,9 +3,9 @@ package me.whizvox.magicmod.server;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.whizvox.magicmod.common.api.ManaStorage;
+import me.whizvox.magicmod.common.api.MagicUser;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.network.MMNetwork;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
 import me.whizvox.magicmod.common.network.UpdateManaMessage;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -17,33 +17,30 @@ public class ManaCommand {
 
   private static int setMana(CommandSourceStack src, double mana) throws CommandSyntaxException {
     ServerPlayer player = src.getPlayerOrException();
-    player.getCapability(MMCapabilities.MANA_STORAGE).ifPresent(manaStorage -> {
-      manaStorage.setMana(mana);
-      if (manaStorage.isModified()) {
-        MMNetwork.sendToClient(player, new UpdateManaMessage(manaStorage));
-      }
-      src.sendSuccess(() -> Component.literal("Set mana to " + manaStorage.getMana()), true);
-    });
+    MagicUser magicUser = MagicUserManager.getUser(player);
+    magicUser.setMana(mana);
+    if (magicUser.hasBeenModified()) {
+      MMNetwork.sendToClient(player, new UpdateManaMessage(magicUser));
+    }
+    src.sendSuccess(() -> Component.literal("Set mana to " + magicUser.getMana()), true);
     return 1;
   }
 
   private static int setMaxMana(CommandSourceStack src, double maxMana) throws CommandSyntaxException {
     ServerPlayer player = src.getPlayerOrException();
-    player.getCapability(MMCapabilities.MANA_STORAGE).ifPresent(manaStorage -> {
-      manaStorage.setMaxMana(maxMana);
-      MMNetwork.sendToClient(player, new UpdateManaMessage(manaStorage));
-      src.sendSuccess(() -> Component.literal("Set max mana to " + manaStorage.getMaxMana()), true);
-    });
+    MagicUser magicUser = MagicUserManager.getUser(player);
+    magicUser.setMaxMana(maxMana);
+    MMNetwork.sendToClient(player, new UpdateManaMessage(magicUser));
+    src.sendSuccess(() -> Component.literal("Set max mana to " + magicUser.getMaxMana()), true);
     return 1;
   }
 
-  private static int setRechargeRate(CommandSourceStack src, double rechargeRate) throws CommandSyntaxException {
+  private static int setRechargeAmount(CommandSourceStack src, double rechargeAmount) throws CommandSyntaxException {
     ServerPlayer player = src.getPlayerOrException();
-    player.getCapability(MMCapabilities.MANA_STORAGE).ifPresent(manaStorage -> {
-      manaStorage.setRechargeRate(rechargeRate);
-      MMNetwork.sendToClient(player, new UpdateManaMessage(manaStorage));
-      src.sendSuccess(() -> Component.literal("Set recharge rate to " + manaStorage.getRechargeRate()), true);
-    });
+    MagicUser magicUser = MagicUserManager.getUser(player);
+    magicUser.setRechargeAmount(rechargeAmount);
+    MMNetwork.sendToClient(player, new UpdateManaMessage(magicUser));
+    src.sendSuccess(() -> Component.literal("Set recharge rate to " + magicUser.getRechargeAmount()), true);
     return 1;
   }
 
@@ -51,16 +48,11 @@ public class ManaCommand {
     if (player == null) {
       player = src.getPlayerOrException();
     }
-    var cap = player.getCapability(MMCapabilities.MANA_STORAGE);
-    if (cap.isPresent()) {
-      ManaStorage manaStorage = cap.resolve().get();
-      src.sendSystemMessage(Component.literal("Stats for ").append(player.getDisplayName()));
-      src.sendSystemMessage(Component.literal("Mana: " + manaStorage.getMana()));
-      src.sendSystemMessage(Component.literal("Max: " + manaStorage.getMaxMana()));
-      src.sendSystemMessage(Component.literal("Rate: " + manaStorage.getRechargeRate()));
-    } else {
-      src.sendSystemMessage(Component.literal("No mana!"));
-    }
+    MagicUser magicUser = MagicUserManager.getUser(player);
+    src.sendSystemMessage(Component.literal("Stats for ").append(player.getDisplayName()));
+    src.sendSystemMessage(Component.literal("Mana: " + magicUser.getMana()));
+    src.sendSystemMessage(Component.literal("Max: " + magicUser.getMaxMana()));
+    src.sendSystemMessage(Component.literal("Rate: " + magicUser.getRechargeAmount()));
     return 1;
   }
 
@@ -77,8 +69,8 @@ public class ManaCommand {
             )
         )
         .then(Commands.literal("setrate")
-            .then(Commands.argument("rate", DoubleArgumentType.doubleArg(0, Double.MAX_VALUE))
-                .executes(ctx -> setRechargeRate(ctx.getSource(), DoubleArgumentType.getDouble(ctx, "rate")))
+            .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0, Double.MAX_VALUE))
+                .executes(ctx -> setRechargeAmount(ctx.getSource(), DoubleArgumentType.getDouble(ctx, "amount")))
             )
         )
         .then(Commands.literal("stats")

@@ -1,6 +1,7 @@
 package me.whizvox.magicmod.common.network;
 
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.api.MagicUser;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -28,9 +29,8 @@ public record UpdateSelectedSpellMessage(int selectedSpell) {
 
     @Override
     public void handle(NetworkEvent.Context ctx, UpdateSelectedSpellMessage msg) {
-      ctx.getSender().getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-        magicUser.setSelectedEquippedSpell(msg.selectedSpell);
-      });
+      MagicUser magicUser = MagicUserManager.getUser(ctx.getSender());
+      magicUser.setSelectedEquippedSpell(msg.selectedSpell);
     }
 
   };

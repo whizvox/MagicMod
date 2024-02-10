@@ -1,8 +1,9 @@
 package me.whizvox.magicmod.common.item;
 
+import me.whizvox.magicmod.common.api.MagicUser;
 import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.registry.SpellRegistry;
 import me.whizvox.magicmod.common.util.SpellUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -28,12 +29,11 @@ public class KnowledgeScrollItem extends Item {
     if (!level.isClientSide) {
       SpellInstance spell = readSpell(player.getItemInHand(hand));
       if (spell != null) {
-        player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-          magicUser.learnSpell(spell.spell(), spell.level());
-          player.displayClientMessage(Component.translatable("message.magicmod.knowledge_scroll.learned", SpellUtil.translateSpellWithLevel(spell, false)), true);
-          player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.NEUTRAL, 1.0F, 1.0F);
-          player.setItemInHand(hand, ItemStack.EMPTY);
-        });
+        MagicUser magicUser = MagicUserManager.getUser(player);
+        magicUser.learnSpell(spell.spell(), spell.level());
+        player.displayClientMessage(Component.translatable("message.magicmod.knowledge_scroll.learned", SpellUtil.translateSpellWithLevel(spell, false)), true);
+        player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.NEUTRAL, 1.0F, 1.0F);
+        player.setItemInHand(hand, ItemStack.EMPTY);
       }
     }
     return super.use(level, player, hand);

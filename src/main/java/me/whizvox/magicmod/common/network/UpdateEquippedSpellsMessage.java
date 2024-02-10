@@ -3,7 +3,7 @@ package me.whizvox.magicmod.common.network;
 import it.unimi.dsi.fastutil.Pair;
 import me.whizvox.magicmod.common.api.MagicUser;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.util.SpellUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -66,9 +66,8 @@ public record UpdateEquippedSpellsMessage(SpellInstance[] equippedSpells, boolea
       } else {
         player = ctx.getSender();
       }
-      player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-        magicUser.updateEquippedSpells(msg.equippedSpells);
-      });
+      MagicUser magicUser = MagicUserManager.getUser(player);
+      magicUser.updateEquippedSpells(msg.equippedSpells);
     }
 
   };

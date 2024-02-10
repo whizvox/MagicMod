@@ -4,7 +4,7 @@ import me.whizvox.magicmod.MagicMod;
 import me.whizvox.magicmod.common.api.MagicUser;
 import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
+import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.network.MMNetwork;
 import me.whizvox.magicmod.common.network.UpdateEquippedSpellsMessage;
 import me.whizvox.magicmod.common.registry.SpellRegistry;
@@ -64,7 +64,7 @@ public class SpellInventoryScreen extends Screen {
 
   @Override
   protected void init() {
-    MagicUser magicUser = minecraft.player.getCapability(MMCapabilities.MAGIC_USER).orElse(null);
+    MagicUser magicUser = MagicUserManager.getUser(minecraft.player);
     leftPos = (width - 194) / 2;
     topPos = (height - 166) / 2;
     for (int i = 0; i < icons.length; i++) {
@@ -123,17 +123,16 @@ public class SpellInventoryScreen extends Screen {
 
   @Override
   public void onClose() {
-    Minecraft.getInstance().player.getCapability(MMCapabilities.MAGIC_USER).ifPresent(magicUser -> {
-      for (int i = 0; i < HOTBAR_SLOTS; i++) {
-        SpellInstance spellInst = icons[i].spellInst;
-        if (spellInst == null) {
-          magicUser.unequipSpell(i);
-        } else {
-          magicUser.equipSpell(i, spellInst.spell(), spellInst.level());
-        }
+    MagicUser magicUser = MagicUserManager.getUser(minecraft.player);
+    for (int i = 0; i < HOTBAR_SLOTS; i++) {
+      SpellInstance spellInst = icons[i].spellInst;
+      if (spellInst == null) {
+        magicUser.unequipSpell(i);
+      } else {
+        magicUser.equipSpell(i, spellInst.spell(), spellInst.level());
       }
-      MMNetwork.sendToServer(new UpdateEquippedSpellsMessage(magicUser, false));
-    });
+    }
+    MMNetwork.sendToServer(new UpdateEquippedSpellsMessage(magicUser, false));
     super.onClose();
   }
 

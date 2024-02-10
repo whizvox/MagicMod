@@ -1,12 +1,8 @@
 package me.whizvox.magicmod.common.util;
 
-import it.unimi.dsi.fastutil.Pair;
 import me.whizvox.magicmod.MagicMod;
-import me.whizvox.magicmod.common.api.MagicUser;
-import me.whizvox.magicmod.common.api.ManaStorage;
 import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
-import me.whizvox.magicmod.common.lib.MMCapabilities;
 import me.whizvox.magicmod.common.registry.SpellRegistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -21,7 +17,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import java.util.function.Predicate;
 
@@ -58,12 +53,6 @@ public class SpellUtil {
       return UNKNOWN_SPELL_ICON_TEXTURE;
     }
     return getSpellIconTexture(spellName);
-  }
-
-  public static Pair<ManaStorage, MagicUser> getMagicCapabilities(ICapabilityProvider caster) {
-    ManaStorage manaStorage = caster.getCapability(MMCapabilities.MANA_STORAGE).orElse(null);
-    MagicUser magicUser = caster.getCapability(MMCapabilities.MAGIC_USER).orElse(null);
-    return Pair.of(manaStorage, magicUser);
   }
 
   public static BlockHitResult lookingAtBlock(Entity entity, double range) {
