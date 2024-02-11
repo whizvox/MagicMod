@@ -195,6 +195,24 @@ public class SpellInventoryScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+      if (this.active && this.visible) {
+        if (this.isValidClickButton(pButton)) {
+          boolean flag = this.clicked(pMouseX, pMouseY);
+          if (flag) {
+            //this.playDownSound(Minecraft.getInstance().getSoundManager());
+            this.onClick(pMouseX, pMouseY);
+            return true;
+          }
+        }
+
+        return false;
+      } else {
+        return false;
+      }
+    }
+
+    @Override
     public void onClick(double pMouseX, double pMouseY) {
       if (isReadOnly) {
         if (SpellInventoryScreen.this.heldSpellInst == null) {

@@ -9,8 +9,10 @@ import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.network.MMNetwork;
 import me.whizvox.magicmod.common.network.UpdateSelectedSpellMessage;
 import me.whizvox.magicmod.common.registry.MMItems;
+import me.whizvox.magicmod.common.util.SpellUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.client.event.InputEvent;
@@ -29,7 +31,8 @@ public class ClientEventListeners {
     return new ResourceLocation(spellName.getNamespace(), "textures/gui/spellicons/" + spellName.getPath() + ".png");
   }
 
-  private static boolean renderEquippedSpellName = false;
+  private static int renderEquippedSpellNameTimer = 0;
+  private static Component equippedSpellTooltip = null;
 
   @SubscribeEvent
   public static void onRenderGui(RenderGuiOverlayEvent.Pre event) {
@@ -58,9 +61,24 @@ public class ClientEventListeners {
           }
         }
       }
-    }
-    if (renderEquippedSpellName) {
-
+      if (renderEquippedSpellNameTimer > 0 && equippedSpellTooltip != null) {
+        Minecraft mc = Minecraft.getInstance();
+        int width = mc.font.width(equippedSpellTooltip);
+        int x = (g.guiWidth() - width) / 2;
+        int y = g.guiHeight() - 59;
+        if (mc.gameMode.canHurtPlayer()) {
+          y -= 14;
+        }
+        int alpha = (int) ((float) renderEquippedSpellNameTimer * 256.0F / 40.0F);
+        if (alpha > 255) {
+          alpha = 255;
+        }
+        if (alpha > 0) {
+          g.fill(x - 2, y - 2, x + width + 2, y + mc.font.lineHeight + 2, mc.options.getBackgroundColor(0));
+          g.drawString(mc.font, equippedSpellTooltip, x, y, 0xFFFFFF | (alpha << 24));
+        }
+        renderEquippedSpellNameTimer--;
+      }
     }
   }
 
@@ -82,7 +100,14 @@ public class ClientEventListeners {
         slot = 0;
       }
       magicUser.setSelectedEquippedSpell(slot);
-      renderEquippedSpellName = true;
+      SpellInstance selectedSpell = magicUser.getEquippedSpell(slot);
+      if (selectedSpell == null) {
+        equippedSpellTooltip = null;
+        renderEquippedSpellNameTimer = 0;
+      } else {
+        equippedSpellTooltip = SpellUtil.translateSpellWithLevel(magicUser.getEquippedSpell(slot), false);
+        renderEquippedSpellNameTimer = (int) (Minecraft.getInstance().options.notificationDisplayTime().get() * 160);
+      }
       MMNetwork.sendToServer(new UpdateSelectedSpellMessage(slot));
     }
   }
