@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -190,7 +191,14 @@ public class SpellInventoryScreen extends Screen {
         g.drawString(minecraft.font, seq, getX() + 17 - width, getY() + 18 - minecraft.font.lineHeight, 0xFFFFFF);
       }
       if (isHovered) {
-        setTooltipForNextRenderPass(getMessage());
+        if (spellInst != null) {
+          List<FormattedCharSequence> tooltip = new ArrayList<>(2);
+          tooltip.add(getMessage().getVisualOrderText());
+          tooltip.add(Component.literal("Cost: " + spellInst.spell().getCost(spellInst.level())).getVisualOrderText());
+          setTooltipForNextRenderPass(tooltip);
+        } else {
+          setTooltipForNextRenderPass(Component.empty());
+        }
       }
     }
 

@@ -33,6 +33,7 @@ public class MMNetwork {
     addHandler(id++, UpdateKnownSpellsMessage.HANDLER);
     addHandler(id++, UpdateEquippedSpellsMessage.HANDLER);
     addHandler(id++, UpdateSelectedSpellMessage.HANDLER);
+    addHandler(id++, SyncMagicUserMessage.HANDLER);
   }
 
   public static void sendToClient(ServerPlayer player, Object msg) {
