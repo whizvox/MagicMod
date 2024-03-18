@@ -4,8 +4,10 @@ import me.whizvox.magicmod.MagicMod;
 import me.whizvox.magicmod.common.item.KnowledgeScrollItem;
 import me.whizvox.magicmod.common.item.UniversalDiggerItem;
 import me.whizvox.magicmod.common.item.WandItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -15,9 +17,15 @@ public class MMItems {
 
   private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MagicMod.MOD_ID);
 
+  private static RegistryObject<BlockItem> registerBlock(RegistryObject<? extends Block> block) {
+    return ITEMS.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties()));
+  }
+
   public static void register(IEventBus bus) {
     ITEMS.register(bus);
   }
+
+  public static final RegistryObject<BlockItem> PEDESTAL = registerBlock(MMBlocks.PEDESTAL);
 
   public static final RegistryObject<WandItem> WAND = ITEMS.register("wand", WandItem::new);
 

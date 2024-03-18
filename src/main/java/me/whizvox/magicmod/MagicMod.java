@@ -2,19 +2,18 @@ package me.whizvox.magicmod;
 
 import me.whizvox.magicmod.client.ClientEventListeners;
 import me.whizvox.magicmod.client.MMKeyMappings;
+import me.whizvox.magicmod.client.renderer.PedestalRenderer;
 import me.whizvox.magicmod.common.api.spelldata.SpellDataManager;
 import me.whizvox.magicmod.common.event.WorldEventListeners;
 import me.whizvox.magicmod.common.lib.MagicUserManager;
 import me.whizvox.magicmod.common.lib.spell.ShieldSpell;
 import me.whizvox.magicmod.common.lib.spelldata.ShieldSpellData;
 import me.whizvox.magicmod.common.network.MMNetwork;
-import me.whizvox.magicmod.common.registry.MMCreativeModeTabs;
-import me.whizvox.magicmod.common.registry.MMItems;
-import me.whizvox.magicmod.common.registry.MMSpells;
-import me.whizvox.magicmod.common.registry.SpellRegistry;
+import me.whizvox.magicmod.common.registry.*;
 import me.whizvox.magicmod.server.ManaCommand;
 import me.whizvox.magicmod.server.SpellCommand;
 import me.whizvox.magicmod.server.lib.MMArgumentTypes;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -27,8 +26,6 @@ import org.slf4j.LoggerFactory;
 @Mod(MagicMod.MOD_ID)
 public class MagicMod {
 
-  private static final String MAGIC_USERS_FILE = "MagicUserData.nbt";
-
   public static final String MOD_ID = "magicmod";
 
   public static final Logger LOGGER = LoggerFactory.getLogger(MagicMod.class);
@@ -40,8 +37,11 @@ public class MagicMod {
 
     modBus.register(SpellRegistry.class);
     modBus.addListener(this::onRegisterKeyMappings);
+    modBus.addListener(this::onRegisterRenderers);
     MMNetwork.register();
+    MMBlocks.register(modBus);
     MMItems.register(modBus);
+    MMBlockEntities.register(modBus);
     MMCreativeModeTabs.register(modBus);
     MMSpells.register(modBus);
     MMArgumentTypes.register(modBus);
@@ -62,6 +62,10 @@ public class MagicMod {
 
   private void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
     event.register(MMKeyMappings.OPEN_SPELL_INVENTORY);
+  }
+
+  private void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+    event.registerBlockEntityRenderer(MMBlockEntities.PEDESTAL.get(), PedestalRenderer::new);
   }
 
 }

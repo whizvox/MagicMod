@@ -1,7 +1,6 @@
 package me.whizvox.magicmod.common.registry;
 
 import me.whizvox.magicmod.MagicMod;
-import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
 import me.whizvox.magicmod.common.item.KnowledgeScrollItem;
 import me.whizvox.magicmod.common.util.SpellUtil;
@@ -11,11 +10,9 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Comparator;
-import java.util.stream.Stream;
 
 public class MMCreativeModeTabs {
 
@@ -29,6 +26,7 @@ public class MMCreativeModeTabs {
       .title(Component.translatable("itemGroup." + MagicMod.MOD_ID + ".main"))
       .icon(() -> new ItemStack(MMItems.WAND.get()))
       .displayItems((parameters, output) -> {
+        output.accept(MMItems.PEDESTAL.get());
         output.accept(MMItems.WAND.get());
         output.accept(MMItems.KNOWLEDGE_FRAGMENT.get());
         SpellRegistry.getRegistry().getValues().stream()
