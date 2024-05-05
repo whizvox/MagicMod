@@ -6,3 +6,4 @@
 
 *.psd
 *.bbmodel
+/src/generated/resources/.cache

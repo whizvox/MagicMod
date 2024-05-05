@@ -34,6 +34,7 @@ public class MMNetwork {
     addHandler(id++, UpdateEquippedSpellsMessage.HANDLER);
     addHandler(id++, UpdateSelectedSpellMessage.HANDLER);
     addHandler(id++, SyncMagicUserMessage.HANDLER);
+    addHandler(id++, SyncPedestalRecipesMessage.HANDLER);
   }
 
   public static void sendToClient(ServerPlayer player, Object msg) {
@@ -42,6 +43,10 @@ public class MMNetwork {
 
   public static void sendToServer(Object msg) {
     INSTANCE.sendToServer(msg);
+  }
+
+  public static void broadcast(Object msg) {
+    INSTANCE.send(PacketDistributor.ALL.noArg(), msg);
   }
 
 }

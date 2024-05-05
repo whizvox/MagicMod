@@ -1,0 +1,23 @@
+{
+  "center": {
+    "item": "minecraft:paper"
+  },
+  "mana": 50,
+  "outer": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "magicmod:knowledge_scroll",
+      "nbt": "{SpellKey:\"magicmod:blink\",SpellLevel:0b}"
+    },
+    {
+      "item": "minecraft:sculk"
+    },
+    {
+      "item": "minecraft:dragon_breath"
+    }
+  ],
+  "result": {
+    "item": "magicmod:knowledge_scroll",
+    "nbt": "{SpellKey:\"magicmod:blink\",SpellLevel:1b}"
+  }
+}

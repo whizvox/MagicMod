@@ -25,8 +25,8 @@ public class PedestalRenderer implements BlockEntityRenderer<PedestalBlockEntity
       pose.pushPose();
       pose.translate(0.5F, 1.2F, 0.5F);
       pose.scale(0.4F, 0.4F, 0.4F);
-      double rotation = pedestal.getItemRotation(partialTicks);
-      pose.mulPose(Axis.YP.rotation((float) rotation));
+      float rotation = pedestal.getItemRotation(partialTicks);
+      pose.mulPose(Axis.YP.rotation(rotation));
       itemRenderer.renderStatic(stack, ItemDisplayContext.FIXED, packedLight, packedOverlay, pose, buffer, pedestal.getLevel(), (int) pedestal.getBlockPos().asLong());
       pose.popPose();
     }

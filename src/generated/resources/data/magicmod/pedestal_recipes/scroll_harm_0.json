@@ -1,0 +1,21 @@
+{
+  "center": {
+    "item": "minecraft:paper"
+  },
+  "mana": 50,
+  "outer": [
+    {
+      "item": "minecraft:glistering_melon_slice"
+    },
+    {
+      "item": "minecraft:fermented_spider_eye"
+    },
+    {
+      "item": "minecraft:stone_sword"
+    }
+  ],
+  "result": {
+    "item": "magicmod:knowledge_scroll",
+    "nbt": "{SpellKey:\"magicmod:harm\",SpellLevel:0b}"
+  }
+}

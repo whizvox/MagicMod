@@ -10,6 +10,7 @@ import static me.whizvox.magicmod.common.registry.SpellRegistry.SPELLS;
 public class MMSpells {
 
   public static final RegistryObject<Spell>
+      CRAFT = SPELLS.register("craft", CraftSpell::new),
       HARM = SPELLS.register("harm", HarmSpell::new),
       HEAL = SPELLS.register("heal", HealSpell::new),
       FIREBALL = SPELLS.register("fireball", FireballSpell::new),

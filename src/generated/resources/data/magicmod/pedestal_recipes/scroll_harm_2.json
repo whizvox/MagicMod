@@ -1,0 +1,20 @@
+{
+  "center": {
+    "item": "minecraft:paper"
+  },
+  "mana": 50,
+  "outer": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "magicmod:knowledge_scroll",
+      "nbt": "{SpellKey:\"magicmod:harm\",SpellLevel:1b}"
+    },
+    {
+      "item": "minecraft:iron_sword"
+    }
+  ],
+  "result": {
+    "item": "magicmod:knowledge_scroll",
+    "nbt": "{SpellKey:\"magicmod:harm\",SpellLevel:2b}"
+  }
+}

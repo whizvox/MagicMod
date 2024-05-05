@@ -3,12 +3,15 @@ package me.whizvox.magicmod.common.item;
 import me.whizvox.magicmod.common.api.MagicUser;
 import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.api.spell.SpellInstance;
+import me.whizvox.magicmod.common.block.entity.PedestalBlockEntity;
 import me.whizvox.magicmod.common.lib.MagicUserManager;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 public class WandItem extends Item {
@@ -32,11 +35,12 @@ public class WandItem extends Item {
           boolean res = spell.activate(spellLevel, player);
           if (res) {
             magicUser.changeMana(-cost);
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
           }
         }
       }
     }
-    return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+    return InteractionResultHolder.pass(stack);
   }
 
 }

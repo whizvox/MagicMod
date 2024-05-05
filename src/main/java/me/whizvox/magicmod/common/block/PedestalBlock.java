@@ -2,6 +2,7 @@ package me.whizvox.magicmod.common.block;
 
 import me.whizvox.magicmod.common.block.entity.PedestalBlockEntity;
 import me.whizvox.magicmod.common.registry.MMBlockEntities;
+import me.whizvox.magicmod.common.registry.MMItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -70,16 +71,9 @@ public class PedestalBlock extends BaseEntityBlock {
     return SHAPE;
   }
 
-  @Nullable
-  @Override
-  public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-    return type == MMBlockEntities.PEDESTAL.get() && level.isClientSide ? PedestalBlockEntity::tick : null;
-  }
-
   @Override
   public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-    BlockEntity be = level.getBlockEntity(pos);
-    if (be instanceof PedestalBlockEntity pedestal) {
+    if (level.getBlockEntity(pos) instanceof PedestalBlockEntity pedestal) {
       ItemStack heldItem = player.getItemInHand(hand);
       if (heldItem.isEmpty() || pedestal.hasItem()) {
         ItemStack removedItem = pedestal.removeItem();
@@ -98,11 +92,8 @@ public class PedestalBlock extends BaseEntityBlock {
 
   @Override
   public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-    BlockEntity be = level.getBlockEntity(pos);
-    if (be instanceof PedestalBlockEntity pedestal) {
-      if (pedestal.hasItem()) {
-        Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), pedestal.getItem());
-      }
+    if (level.getBlockEntity(pos) instanceof PedestalBlockEntity pedestal && pedestal.hasItem()) {
+      Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), pedestal.getItem());
     }
     super.onRemove(state, level, pos, newState, isMoving);
   }
