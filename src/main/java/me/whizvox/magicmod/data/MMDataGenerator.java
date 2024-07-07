@@ -22,6 +22,7 @@ public class MMDataGenerator {
     var lookupProvider = event.getLookupProvider();
     boolean includeClient = event.includeClient();
     boolean includeServer = event.includeServer();
+
     gen.addProvider(includeClient, new MMItemModelProvider(output, fileHelper));
     gen.addProvider(includeServer, new PedestalRecipeProvider(gen, MagicMod.MOD_ID));
   }

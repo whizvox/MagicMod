@@ -3,7 +3,6 @@ package me.whizvox.magicmod.common.lib.spell;
 import me.whizvox.magicmod.common.api.spell.Spell;
 import me.whizvox.magicmod.common.block.entity.PedestalBlockEntity;
 import me.whizvox.magicmod.common.util.SpellUtil;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;

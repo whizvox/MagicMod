@@ -36,7 +36,7 @@ public class PedestalRecipeProvider implements DataProvider {
 
   @Override
   public String getName() {
-    return "Pedestal Recipes";
+    return "PedestalRecipes";
   }
 
   @Override

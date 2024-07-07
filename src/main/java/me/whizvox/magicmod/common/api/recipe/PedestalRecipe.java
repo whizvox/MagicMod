@@ -3,6 +3,7 @@ package me.whizvox.magicmod.common.api.recipe;
 import com.google.gson.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.whizvox.magicmod.MagicMod;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -30,9 +31,7 @@ public final class PedestalRecipe {
     this.id = id;
     this.manaCost = manaCost;
     this.center = center;
-    this.outer = outer.stream()
-        .sorted(Comparator.comparing(Ingredient::isSimple).thenComparing(ingredient -> ingredient.getItems().length))
-        .toList();
+    this.outer = Collections.unmodifiableList(outer);
     this.result = result;
   }
 
@@ -52,42 +51,39 @@ public final class PedestalRecipe {
 
   @Nullable
   public PedestalCraftItems test(PedestalCraftItems input) {
-    if (outer.size() > input.outer().size()) {
+    if (outer.size() != input.outer().size()) {
       return null;
     }
     if (!center.test(input.center())) {
       return null;
     }
-    // since the number of ingredients should never exceed 8, it's actually fastest to rely on linear search
     IntList usedItems = new IntArrayList(outer.size());
     for (Ingredient ingredient : outer) {
       for (int i = 0; i < input.outer().size(); i++) {
-        if (!usedItems.contains(i) && ingredient.test(input.outer().get(i))) {
+        ItemStack stack = input.outer().get(i);
+        if (!usedItems.contains(i) && ingredient.test(stack)) {
           usedItems.add(i);
-          if (usedItems.size() == outer.size()) {
-            List<ItemStack> outerResult = new ArrayList<>();
-            for (int j = 0; j < input.outer().size(); j++) {
-              if (usedItems.contains(j)) {
-                outerResult.add(ItemStack.EMPTY);
-              } else {
-                outerResult.add(input.outer().get(j));
-              }
-            }
-            return new PedestalCraftItems(ItemStack.EMPTY, outerResult);
-          }
+          break;
         }
       }
     }
-    return null;
+    if (usedItems.size() != outer.size()) {
+      return null;
+    }
+    List<ItemStack> outerResult = new ArrayList<>();
+    for (int i = 0; i < input.outer().size(); i++) {
+      outerResult.add(ItemStack.EMPTY);
+    }
+    return new PedestalCraftItems(result.copy(), outerResult);
   }
 
   public JsonElement toJson() {
     JsonObject json = new JsonObject();
     json.addProperty("mana", manaCost);
     json.add("center", center.toJson());
-    JsonArray ingredientsJson = new JsonArray();
-    outer.forEach(ingredient -> ingredientsJson.add(ingredient.toJson()));
-    json.add("outer", ingredientsJson);
+    JsonArray outerJson = new JsonArray();
+    outer.forEach(ingredient -> outerJson.add(ingredient.toJson()));
+    json.add("outer", outerJson);
     JsonObject resultJson = new JsonObject();
     resultJson.addProperty("item", ForgeRegistries.ITEMS.getKey(result.getItem()).toString());
     if (result.getCount() > 1) {
@@ -177,8 +173,8 @@ public final class PedestalRecipe {
       if (center == null) {
         throw new IllegalStateException("Center ingredient must be defined");
       }
-      if (result == null) {
-        throw new IllegalStateException("Spell must be defined");
+      if (result.isEmpty()) {
+        throw new IllegalStateException("Result must be defined");
       }
       if (outer.isEmpty()) {
         throw new IllegalStateException("Ingredients list cannot be empty");

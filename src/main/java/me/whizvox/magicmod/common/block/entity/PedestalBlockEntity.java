@@ -5,10 +5,12 @@ import me.whizvox.magicmod.common.api.recipe.PedestalRecipeMatch;
 import me.whizvox.magicmod.common.registry.MMBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -17,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class PedestalBlockEntity extends BlockEntity {
 
@@ -72,7 +73,7 @@ public class PedestalBlockEntity extends BlockEntity {
           }
           return null;
         })
-        .filter(Objects::nonNull)
+        .filter(pedestal -> pedestal != null && pedestal.hasItem())
         .toList();
     List<ItemStack> stacks = pedestals.stream().map(pedestal -> pedestal.storedStack).toList();
     List<PedestalRecipeMatch> matchingRecipes = PedestalRecipeManager.INSTANCE.match(storedStack, stacks);
@@ -86,9 +87,10 @@ public class PedestalBlockEntity extends BlockEntity {
       pedestal.setItem(match.output().outer().get(i));
       level.sendBlockUpdated(pedestal.worldPosition, pedestal.getBlockState(), pedestal.getBlockState(), Block.UPDATE_ALL);
     }
-    storedStack = match.recipe().getResult();
-    setChanged();
     level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+    if (level instanceof ServerLevel serverLevel) {
+      serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, worldPosition.getX() + 0.5, worldPosition.getY() + 1.1, worldPosition.getZ() + 0.5, 5, 0.2, 0.2, 0.2, 0.2);
+    }
     return true;
   }
 
